@@ -1,14 +1,18 @@
 package hudson.plugins.cmvc.util;
 
-import hudson.FilePath;
+import hudson.Util;
 import hudson.plugins.cmvc.CmvcChangeLogSet;
 import hudson.plugins.cmvc.CmvcSCM;
 import hudson.plugins.cmvc.CmvcChangeLogSet.CmvcChangeLog;
 import hudson.util.ArgumentListBuilder;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Provides cmvc commands to {@link CmvcSCM}.
@@ -18,16 +22,12 @@ import java.util.TreeSet;
  *
  */
 public class CommandLineUtil {
-	
-	
+
 	private CmvcSCM cmvcSCM = null;
-	
-	
+
 	public CommandLineUtil(CmvcSCM cmvcSCM) {
-		super();
 		this.cmvcSCM = cmvcSCM;
 	}
-
 
 	/**
 	 * Generates the command line for the Report command.
@@ -42,18 +42,29 @@ public class CommandLineUtil {
 	 *            String representing the last build execution time
 	 * @return new command line object
 	 */
-	public ArgumentListBuilder buildReportTrackViewCommand(
-			String strNow, String strLastBuild) {
+	public ArgumentListBuilder buildReportTrackViewCommand(String strNow,
+			String strLastBuild) {
 		ArgumentListBuilder command = buildBasicRawReportCommand("TrackView");
 		command.add("-where");
-		command.add("lastUpdate between " + strNow + " and " + strLastBuild
-				+ " and state = 'integrate' and releaseName in "
-				+ convertToReleaseInClause(cmvcSCM.getReleases())
-				+ " order by defectName");
+
+		if (StringUtils.isEmpty(cmvcSCM.getTrackViewReportWhereClause())) {
+			command.add("lastUpdate between " + strNow + " and " + strLastBuild
+					+ " and state = 'integrate' and releaseName in "
+					+ convertToReleaseInClause(cmvcSCM.getReleases())
+					+ " order by defectName");
+		} else {
+			Map<String, String> props = new HashMap<String, String>(2);
+			props.put("now", strNow);
+			props.put("lastBuild", strLastBuild);
+			props.put("releases", convertToReleaseInClause(cmvcSCM
+					.getReleases()));
+			command.add(Util.replaceMacro(cmvcSCM
+					.getTrackViewReportWhereClause(), props));
+		}
+
 		return command;
 	}
-	
-	
+
 	/**
 	 * Generates the command line for the Report command.
 	 *
@@ -68,60 +79,41 @@ public class CommandLineUtil {
 	public ArgumentListBuilder buildReportChangeViewCommand(String[] trackNames) {
 		ArgumentListBuilder command = buildBasicRawReportCommand("ChangeView");
 		command.add("-where");
-		command.add("defectName in " + convertToInClause(trackNames) + " and releaseName in "
+		command.add("defectName in " + convertToInClause(trackNames)
+				+ " and releaseName in "
 				+ convertToReleaseInClause(cmvcSCM.getReleases())
 				+ " order by defectName");
 		return command;
 	}
-	
+
 	/**
 	 * @param changeLogSet
 	 * @return
 	 */
-	public ArgumentListBuilder buildReportChangeViewCommand(CmvcChangeLogSet changeLogSet) {
+	public ArgumentListBuilder buildReportChangeViewCommand(
+			CmvcChangeLogSet changeLogSet) {
 		List<CmvcChangeLog> changeLogs = changeLogSet.getLogs();
-		if ( changeLogs.size() > 0 ) {
-			Set<String> trackNames = new TreeSet<String>(); 
-			for( CmvcChangeLog log : changeLogs)
+		if (changeLogs.size() > 0) {
+			Set<String> trackNames = new TreeSet<String>();
+			for (CmvcChangeLog log : changeLogs)
 				trackNames.add(log.getTrackName());
-			return buildReportChangeViewCommand( trackNames.toArray(new String[0]) );
+			return buildReportChangeViewCommand(trackNames
+					.toArray(new String[0]));
 		}
 		return null;
 	}
 
-	/**
-	 * @param workspace
-	 * @return
-	 */
-	public ArgumentListBuilder buildReleaseExtractCommand(FilePath workspace) {
-		ArgumentListBuilder command = new ArgumentListBuilder();
-		command.add("Release");
-		command.add("-family");
-		command.add(cmvcSCM.getFamily());
-		
-		//FIXME Handle multiple releases
-		command.add("-extract");
-		command.add(cmvcSCM.getReleases());
-		
-		command.add("-root");
-		command.add(workspace.getName());
-		
-		//TODO where is the node?
-		command.add("-node");
-		command.add("");
-		
-		command.add("-committed");
-		
-		return command;
-	}
-
-	
-	
 	private ArgumentListBuilder buildBasicRawReportCommand(String viewName) {
 		ArgumentListBuilder command = new ArgumentListBuilder();
 		command.add("Report");
 		command.add("-family");
 		command.add(cmvcSCM.getFamily());
+
+		if (StringUtils.isNotEmpty(cmvcSCM.getBecome())) {
+			command.add("-become");
+			command.add(cmvcSCM.getBecome());
+		}
+
 		command.add("-raw");
 		command.add("-view");
 		command.add(viewName);
@@ -142,7 +134,7 @@ public class CommandLineUtil {
 		}
 		return buf.toString();
 	}
-	
+
 	/**
 	 * @param rel
 	 * @return
@@ -151,15 +143,14 @@ public class CommandLineUtil {
 		String[] releaseList = rel.split(",");
 		return convertToInClause(releaseList);
 	}
-	
 
 	public String convertToUnixQuotedParameter(String[] trackList) {
 		int length = trackList.length;
-		
-		if ( length < 1 ) {
+
+		if (length < 1) {
 			return "";
 		}
-		
+
 		StringBuffer buf = new StringBuffer("");
 		for (int i = 0; i < length; i++) {
 			String temp = trackList[i].trim();

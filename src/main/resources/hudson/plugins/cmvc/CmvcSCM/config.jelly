@@ -1,18 +1,23 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  <!--
-    This jelly script is used for per-project configuration.
-    See global.jelly for a general discussion about jelly script.
-  -->
-  <f:entry title="Family" help="${rootURL}/plugin/cmvc/help-family.html">
-    <f:textbox field="cmvc.family" value="${scm.family}" />
+
+  <f:entry title="Family" help="${rootURL}/plugin/cmvc/help/help-family.html">
+    <f:textbox field="family" value="${scm.family}" />
   </f:entry>
-  <f:entry title="Releases" help="${rootURL}/plugin/cmvc/help-releases.html">
-    <f:textbox field="cmvc.releases" value="${scm.releases}" />
+  <f:entry title="Releases" help="${rootURL}/plugin/cmvc/help/help-releases.html">
+    <f:textbox field="releases" value="${scm.releases}" />
   </f:entry>
-  <f:entry title="Become User" help="${rootURL}/plugin/cmvc/help-become.html">
-    <f:textbox field="cmvc.become" value="${scm.become}" />
+  <f:entry title="Become User" help="${rootURL}/plugin/cmvc/help/help-become.html">
+    <f:textbox field="become" value="${scm.become}" />
   </f:entry>
-  <f:entry title="Checkout Script" help="${rootURL}/plugin/cmvc/help-checkoutScript.html">
-    <f:textbox field="cmvc.checkoutScript" value="${scm.checkoutScript}" />
+  <f:entry title="Checkout Script" help="${rootURL}/plugin/cmvc/help/help-checkoutScript.html">
+    <f:textbox field="checkoutScript" value="${scm.checkoutScript}" />
   </f:entry>
+
+  <f:advanced>
+	  <f:entry title="TrackView Report Where Clause" help="${rootURL}/plugin/cmvc/help/help-trackViewReportWhereClause.html">
+	    <f:textarea field="trackViewReportWhereClause" value="${scm.trackViewReportWhereClause}" />
+	  </f:entry>
+  </f:advanced>
+
 </j:jelly>
+

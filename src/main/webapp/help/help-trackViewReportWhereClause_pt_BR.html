@@ -1,0 +1,20 @@
+<div>
+<p>Clausula "where" que sera utilizada pelo comando <code>Report
+-raw -view TrackView</code>.Utilizada para polling. Checa se houve mudanças na
+familia monitorada e caso positivo dispara a build.</p>
+<p>Sao disponibilizadas 3 variaveis no contexto sao elas:
+<ul>
+<li>now</li>
+<li>lastBuild</li>
+<li>releases</li>
+</ul>
+</p>
+<p>E opcional. Se deixado em branco sera utilizda a clausula default:
+<pre>
+lastUpdate between $now and $lastBuild
+and state = 'integrate' 
+and releaseName in ($releases)
+order by defectName
+</pre>
+</p>
+</div>

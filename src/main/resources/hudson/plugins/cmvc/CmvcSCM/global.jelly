@@ -5,5 +5,14 @@
       help="${rootURL}/plugin/cmvc/help-globalConfig.html">
       <f:textbox name="cmvc.cmvcPath" value="${descriptor.cmvcPath}" />
     </f:entry>
+
+<!--
+    <f:entry title="CMVC version "
+      description="CMVC version"
+      help="${rootURL}/plugin/cmvc/help-globalConfig.html">
+      <f:textbox name="cmvc.version" value="${descriptor.version}" />
+    </f:entry>
+--> 
+   
   </f:section>
 </j:jelly>

@@ -75,6 +75,11 @@ public class CmvcRawParser {
 		return changes;
 	}
 
+	public static boolean parseTrackViewReport(Reader rawResult) throws IOException {
+		String[][] parsedResult = parseCmvcRawReport(rawResult);
+		return parsedResult != null && !(parsedResult.length <= 0);
+	}
+
 	private static String[][] parseCmvcRawReport(Reader rawResult)
 			throws IOException {
 		parser = new CSVParser(rawResult, '|');
