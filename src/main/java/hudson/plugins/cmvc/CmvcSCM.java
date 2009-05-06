@@ -457,7 +457,7 @@ public class CmvcSCM extends SCM implements Serializable {
 		public FormValidation doCheckFamily(@QueryParameter
 		String value) {
 			if (StringUtils.isEmpty(value)) {
-				return FormValidation.error("Family is mandatory");
+				return FormValidation.error(Messages.cmvc_family_mandatory());
 			}
 			return FormValidation.ok();
 		}
@@ -468,7 +468,7 @@ public class CmvcSCM extends SCM implements Serializable {
 		public FormValidation doCheckReleases(@QueryParameter
 		String value) {
 			if (StringUtils.isEmpty(value)) {
-				return FormValidation.error("Releases is mandatory");
+				return FormValidation.error(Messages.cmvc_releases_mandatory());
 			}
 			return FormValidation.ok();
 		}
@@ -481,7 +481,7 @@ public class CmvcSCM extends SCM implements Serializable {
 			if (StringUtils.isNotEmpty(value)) {
 				File script = new File(value);
 				if (!script.exists()) {
-					return FormValidation.error("File does not exist.");
+					return FormValidation.error(Messages.cmvc_checkoutScript_filenotexist());
 				}
 			}
 			return FormValidation.ok();
