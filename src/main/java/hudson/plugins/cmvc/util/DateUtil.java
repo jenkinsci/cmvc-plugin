@@ -5,7 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * 
+ * Helper methods for date convertion
+ *  
  * @author <a href="mailto:fuechi@ciandt.com">Fábio Franco Uechi</a>
  *
  */

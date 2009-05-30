@@ -4,14 +4,14 @@
       ${%No changes.}
     </j:when>
     <j:otherwise>
-      Changes
-      <ol>
+       Changes ${it.length}
+      <ul>
         <j:forEach var="cs" items="${it.items}" varStatus="loop">
           <li>
-            ${cs.msgAnnotated} (<a href="changes#detail${loop.index}">detail</a>)
+            <b>${cs.trackName}</b> - ${cs.msgAnnotated} (<a href="changes#detail${loop.index}">detail</a>)
           </li>
         </j:forEach>
-      </ol>
+      </ul>
     </j:otherwise>
   </j:choose>
 </j:jelly>
