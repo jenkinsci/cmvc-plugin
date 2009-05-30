@@ -127,7 +127,6 @@ public final class CmvcChangeLogSet extends ChangeLogSet<CmvcChangeLogSet.CmvcCh
 		public Collection<String> getAffectedPaths() {
 			return CollectionUtils.collect(files, TransformerUtils
 					.invokerTransformer("getPath"));
-
 		}
         
         public void setUser(String author) {

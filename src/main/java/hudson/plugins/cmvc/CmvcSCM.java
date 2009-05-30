@@ -198,13 +198,13 @@ public class CmvcSCM extends SCM implements Serializable {
 			InterruptedException {
 
 		workspace.deleteContents();
-
+		
 		ArgumentListBuilder cmd = new ArgumentListBuilder();
 		cmd.add(this.checkoutScript);
 		cmd.addQuoted(getCmvcCommandLineUtil().convertToUnixQuotedParameter(
 				cmvcChangeLogSet.getTrackNames().toArray(new String[0])));
 
-		return run(launcher, cmd, listener, workspace);
+		return run(launcher, cmd, listener, workspace, build);
 	}
 
 	private CmvcChangeLogSet getCmvcChangeLogSet(AbstractBuild build,
@@ -230,7 +230,7 @@ public class CmvcSCM extends SCM implements Serializable {
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		if (run(launcher, cmd, listener, workspace, new ForkOutputStream(baos,
-				listener.getLogger()))) {
+				listener.getLogger()), build)) {
 			BufferedReader in = new BufferedReader(new InputStreamReader(
 					new ByteArrayInputStream(baos.toByteArray())));
 			changeLogSet = new CmvcChangeLogSet(build);
@@ -245,7 +245,7 @@ public class CmvcSCM extends SCM implements Serializable {
 
 		if (cmd != null) {
 			if (run(launcher, cmd, listener, workspace, new ForkOutputStream(
-					baos, listener.getLogger()))) {
+					baos, listener.getLogger()), build)) {
 				BufferedReader in = new BufferedReader(new InputStreamReader(
 						new ByteArrayInputStream(baos.toByteArray())));
 
@@ -303,7 +303,7 @@ public class CmvcSCM extends SCM implements Serializable {
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		if (!run(launcher, cmd, listener, workspace, new ForkOutputStream(baos,
-				listener.getLogger())))
+				listener.getLogger()), null))
 			return false;
 		BufferedReader in = new BufferedReader(new InputStreamReader(
 				new ByteArrayInputStream(baos.toByteArray())));
@@ -314,18 +314,17 @@ public class CmvcSCM extends SCM implements Serializable {
 	/**
 	 * Invokes the command with the specified command line option and wait for
 	 * its completion.
-	 * 
 	 * @param dir
 	 *            if launching locally this is a local path, otherwise a remote
 	 *            path.
 	 * @param out
 	 *            Receives output from the executed program.
+	 * @param build TODO
 	 */
 	protected final boolean run(Launcher launcher, ArgumentListBuilder cmd,
-			TaskListener listener, FilePath dir, OutputStream out)
+			TaskListener listener, FilePath dir, OutputStream out, AbstractBuild build)
 			throws IOException, InterruptedException {
-		Map<String, String> env = createEnvVarMap(true);
-
+		Map<String, String> env = createEnvVarMap(true, build);
 		int r = launcher.launch(cmd.toCommandArray(), env, out, dir).join();
 		if (r != 0)
 			listener.fatalError(getDescriptor().getDisplayName()
@@ -335,9 +334,9 @@ public class CmvcSCM extends SCM implements Serializable {
 	}
 
 	protected final boolean run(Launcher launcher, ArgumentListBuilder cmd,
-			TaskListener listener, FilePath dir) throws IOException,
+			TaskListener listener, FilePath dir, AbstractBuild build) throws IOException,
 			InterruptedException {
-		return run(launcher, cmd, listener, dir, listener.getLogger());
+		return run(launcher, cmd, listener, dir, listener.getLogger(), build);
 	}
 
 	/**
@@ -347,30 +346,34 @@ public class CmvcSCM extends SCM implements Serializable {
 	 *            properties that need to be overridden. This is for use with
 	 *            {@link Launcher}. false to indicate that the map should
 	 *            contain complete map. This is to invoke {@link Proc} directly.
+	 * @param build TODO
 	 */
-	protected final Map<String, String> createEnvVarMap(boolean overrideOnly) {
-		Map<String, String> env = getCmvcEnvVars();
-		if (!overrideOnly)
-			env.putAll(EnvVars.masterEnvVars);
-		buildEnvVars(null/* TODO */, env);
-		return env;
-	}
-
-	private Map<String, String> getCmvcEnvVars() {
+	protected final Map<String, String> createEnvVarMap(boolean overrideOnly, AbstractBuild build) {
 		Map<String, String> env = new HashMap<String, String>();
-		env.put("CMVC_FAMILY", this.family);
-		env.put("CMVC_RELEASES", this.releases);
-		
-		if (StringUtils.isNotEmpty(this.become)){
-			env.put("CMVC_BECOME", this.become);
+
+		try {
+			if (build != null){
+				env = build.getEnvironment();
+			}
+		} catch (IOException e) {
+		} catch (InterruptedException e) {
 		}
 		
+		if (!overrideOnly)
+			env.putAll(EnvVars.masterEnvVars);
+
 		return env;
 	}
 
 	@Override
 	public void buildEnvVars(AbstractBuild build, Map<String, String> env) {
-		super.buildEnvVars(build, getCmvcEnvVars());
+		super.buildEnvVars(build, env);
+		
+		env.put("CMVC_FAMILY", this.family);
+		env.put("CMVC_RELEASES", this.releases);
+		if (StringUtils.isNotEmpty(this.become)){
+			env.put("CMVC_BECOME", this.become);
+		}
 	}
 
 	/**
