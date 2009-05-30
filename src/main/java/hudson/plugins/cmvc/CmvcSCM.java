@@ -39,6 +39,7 @@ import java.util.Map;
 
 import net.sf.json.JSONObject;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -151,6 +152,7 @@ public class CmvcSCM extends SCM implements Serializable {
 				this);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean checkout(AbstractBuild build, Launcher launcher,
 			FilePath workspace, BuildListener listener, File changelogFile)
@@ -192,6 +194,7 @@ public class CmvcSCM extends SCM implements Serializable {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private boolean doCheckout(AbstractBuild build, Launcher launcher,
 			FilePath workspace, BuildListener listener, File changelogFile,
 			CmvcChangeLogSet cmvcChangeLogSet) throws IOException,
@@ -200,6 +203,9 @@ public class CmvcSCM extends SCM implements Serializable {
 		workspace.deleteContents();
 		
 		ArgumentListBuilder cmd = new ArgumentListBuilder();
+		if (isGroovyCheckoutScript() && !launcher.isUnix()) {
+			cmd.add("groovy");
+		}
 		cmd.add(this.checkoutScript);
 		cmd.addQuoted(getCmvcCommandLineUtil().convertToUnixQuotedParameter(
 				cmvcChangeLogSet.getTrackNames().toArray(new String[0])));
@@ -207,6 +213,11 @@ public class CmvcSCM extends SCM implements Serializable {
 		return run(launcher, cmd, listener, workspace, build);
 	}
 
+	private boolean isGroovyCheckoutScript() {
+		return FilenameUtils.isExtension(this.checkoutScript, ".groovy");
+	}
+
+	@SuppressWarnings("unchecked")
 	private CmvcChangeLogSet getCmvcChangeLogSet(AbstractBuild build,
 			Launcher launcher, FilePath workspace, BuildListener listener,
 			File changelogFile) throws IOException, InterruptedException,
@@ -219,7 +230,6 @@ public class CmvcSCM extends SCM implements Serializable {
 			lastBuild = build.getPreviousBuild().getTimestamp().getTime();
 		} else {
 			listener.getLogger().println("No previous build.");
-			// FIXME o q fazer quando é a primeira build?
 			lastBuild = new Date();
 		}
 
@@ -321,6 +331,7 @@ public class CmvcSCM extends SCM implements Serializable {
 	 *            Receives output from the executed program.
 	 * @param build TODO
 	 */
+	@SuppressWarnings("unchecked")
 	protected final boolean run(Launcher launcher, ArgumentListBuilder cmd,
 			TaskListener listener, FilePath dir, OutputStream out, AbstractBuild build)
 			throws IOException, InterruptedException {
@@ -333,6 +344,7 @@ public class CmvcSCM extends SCM implements Serializable {
 		return r == 0;
 	}
 
+	@SuppressWarnings("unchecked")
 	protected final boolean run(Launcher launcher, ArgumentListBuilder cmd,
 			TaskListener listener, FilePath dir, AbstractBuild build) throws IOException,
 			InterruptedException {
@@ -348,6 +360,7 @@ public class CmvcSCM extends SCM implements Serializable {
 	 *            contain complete map. This is to invoke {@link Proc} directly.
 	 * @param build TODO
 	 */
+	@SuppressWarnings("unchecked")
 	protected final Map<String, String> createEnvVarMap(boolean overrideOnly, AbstractBuild build) {
 		Map<String, String> env = new HashMap<String, String>();
 
@@ -365,6 +378,7 @@ public class CmvcSCM extends SCM implements Serializable {
 		return env;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void buildEnvVars(AbstractBuild build, Map<String, String> env) {
 		super.buildEnvVars(build, env);
