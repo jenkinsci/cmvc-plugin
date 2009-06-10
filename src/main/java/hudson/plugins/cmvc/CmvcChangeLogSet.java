@@ -64,6 +64,7 @@ public final class CmvcChangeLogSet extends ChangeLogSet<CmvcChangeLogSet.CmvcCh
     /**
      * In-memory representation of CMVC Changelog: defect or feature.
      */
+	@ExportedBean(defaultVisibility=999)
     public static class CmvcChangeLog extends ChangeLogSet.Entry {
         
     	public CmvcChangeLog() {

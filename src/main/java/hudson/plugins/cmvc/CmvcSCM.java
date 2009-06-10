@@ -167,17 +167,20 @@ public class CmvcSCM extends SCM implements Serializable {
 			cmvcChangeLogSet = getCmvcChangeLogSet(build, launcher, workspace,
 					listener, changelogFile);
 
-			if (cmvcChangeLogSet.getTrackNames() != null) {
-				checkoutResult = doCheckout(build, launcher, workspace,
-						listener, changelogFile, cmvcChangeLogSet);
-			} else {
-				checkoutResult = true;
+			if (cmvcChangeLogSet != null) {
+				
+				if (cmvcChangeLogSet.getTrackNames() != null) {
+					checkoutResult = doCheckout(build, launcher, workspace,
+							listener, changelogFile, cmvcChangeLogSet);
+				} else {
+					checkoutResult = true;
+				}
+				listener.getLogger().print("Writing changelog file.");
+				writeChangeLogFile(changelogFile, cmvcChangeLogSet);
 			}
-
-			writeChangeLogFile(changelogFile, cmvcChangeLogSet);
-
+			
 		} catch (Throwable e) {
-			listener.fatalError(e.getMessage(), e);
+			listener.fatalError("Error performing checkout: " + e.getMessage(), e);
 			checkoutResult = false;
 		}
 
@@ -200,6 +203,7 @@ public class CmvcSCM extends SCM implements Serializable {
 			CmvcChangeLogSet cmvcChangeLogSet) throws IOException,
 			InterruptedException {
 
+		listener.getLogger().print("Wiping out workspace.");
 		workspace.deleteContents();
 		
 		ArgumentListBuilder cmd = new ArgumentListBuilder();
@@ -210,6 +214,7 @@ public class CmvcSCM extends SCM implements Serializable {
 		cmd.addQuoted(getCmvcCommandLineUtil().convertToUnixQuotedParameter(
 				cmvcChangeLogSet.getTrackNames().toArray(new String[0])));
 
+		listener.getLogger().print("Invoking checkout script.");
 		return run(launcher, cmd, listener, workspace, build);
 	}
 
@@ -223,20 +228,8 @@ public class CmvcSCM extends SCM implements Serializable {
 			File changelogFile) throws IOException, InterruptedException,
 			ParseException {
 
-		Date lastBuild = null;
 		CmvcChangeLogSet changeLogSet = null;
-
-		if (build.getPreviousBuild() != null) {
-			lastBuild = build.getPreviousBuild().getTimestamp().getTime();
-		} else {
-			listener.getLogger().println("No previous build.");
-			lastBuild = new Date();
-		}
-
-		ArgumentListBuilder cmd = getCmvcCommandLineUtil()
-				.buildReportTrackViewCommand(
-						DateUtil.convertToCmvcDate(lastBuild),
-						DateUtil.convertToCmvcDate(new Date()));
+		ArgumentListBuilder cmd = generateChangesDetectionCommand(build.getProject(), listener);
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		if (run(launcher, cmd, listener, workspace, new ForkOutputStream(baos,
@@ -247,6 +240,8 @@ public class CmvcSCM extends SCM implements Serializable {
 			List<CmvcChangeLog> logs = CmvcRawParser.parseTrackViewReport(in,
 					changeLogSet);
 			changeLogSet.setLogs(logs);
+		} else {
+			throw new IOException("Error while checking for tracks");
 		}
 
 		cmd = getCmvcCommandLineUtil().buildReportChangeViewCommand(
@@ -261,6 +256,8 @@ public class CmvcSCM extends SCM implements Serializable {
 
 				CmvcRawParser.parseChangeViewReportAndPopulateChangeLogs(in,
 						changeLogSet);
+			} else {
+				throw new IOException("Error while checking for changes");
 			}
 		}
 
@@ -279,7 +276,7 @@ public class CmvcSCM extends SCM implements Serializable {
 
 	/**
 	 * Polls cmvc repository for integrated tracks within the current family and
-	 * release
+	 * releases
 	 * 
 	 * <p>
 	 * By default it checks for changes in a CMVC family (repository). Triggers a build if any
@@ -296,20 +293,13 @@ public class CmvcSCM extends SCM implements Serializable {
 			FilePath workspace, TaskListener listener) throws IOException,
 			InterruptedException {
 
-		Date lastBuild = null;
-		if (project.getLastBuild() != null) {
-			lastBuild = project.getLastBuild().getTimestamp().getTime();
-		} else {
-			listener.getLogger().println("No previous build.");
-			// FIXME o q fazer quando é a primeira build?
-			lastBuild = new Date();
-			return false;
+		if (project.getLastBuild() == null ) {
+			listener.getLogger().println("No existing build. Starting a new one");
+			return true;
 		}
-
-		ArgumentListBuilder cmd = getCmvcCommandLineUtil()
-				.buildReportTrackViewCommand(
-						DateUtil.convertToCmvcDate(lastBuild),
-						DateUtil.convertToCmvcDate(new Date()));
+		
+		ArgumentListBuilder cmd = generateChangesDetectionCommand(project,
+				listener);
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		if (!run(launcher, cmd, listener, workspace, new ForkOutputStream(baos,
@@ -319,6 +309,24 @@ public class CmvcSCM extends SCM implements Serializable {
 				new ByteArrayInputStream(baos.toByteArray())));
 
 		return CmvcRawParser.parseTrackViewReport(in);
+	}
+
+	@SuppressWarnings("unchecked")
+	private ArgumentListBuilder generateChangesDetectionCommand(
+			AbstractProject project, TaskListener listener) {
+		Date lastBuild = null; 
+		if (project.getLastSuccessfulBuild() != null) {
+			lastBuild = project.getLastSuccessfulBuild().getTimestamp().getTime();
+		} else {
+			listener.getLogger().println("No existing successful build.");
+			lastBuild = DateUtil.MIN_DATE;
+		}
+
+		ArgumentListBuilder cmd = getCmvcCommandLineUtil()
+				.buildReportTrackViewCommand(
+						DateUtil.convertToCmvcDate(new Date()),
+						DateUtil.convertToCmvcDate(lastBuild));
+		return cmd;
 	}
 
 	/**
@@ -458,8 +466,8 @@ public class CmvcSCM extends SCM implements Serializable {
 		public boolean configure(StaplerRequest req) throws FormException {
 			this.cmvcPath = Util.fixEmpty(req.getParameter("cmvc.cmvcPath")
 					.trim());
-			this.cmvcVersion = Util.fixEmpty(req.getParameter(
-					"cmvc.cmvcVersion").trim());
+//			this.cmvcVersion = Util.fixEmpty(req.getParameter(
+//					"cmvc.cmvcVersion").trim());
 			save();
 			return true;
 		}
@@ -519,6 +527,7 @@ public class CmvcSCM extends SCM implements Serializable {
 		}
 
 		public String getCmvcPath() {
+			
 			if (cmvcPath == null) {
 				return "c:/cmvc/exe";
 			}

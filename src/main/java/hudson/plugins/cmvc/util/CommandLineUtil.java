@@ -48,7 +48,7 @@ public class CommandLineUtil {
 		command.add("-where");
 
 		if (StringUtils.isEmpty(cmvcSCM.getTrackViewReportWhereClause())) {
-			command.add("lastUpdate between " + strNow + " and " + strLastBuild
+			command.add("lastUpdate between " + strLastBuild + " and " + strNow 
 					+ " and state = 'integrate' and releaseName in "
 					+ convertToReleaseInClause(cmvcSCM.getReleases())
 					+ " order by defectName");
@@ -82,7 +82,7 @@ public class CommandLineUtil {
 		command.add("defectName in " + convertToInClause(trackNames)
 				+ " and releaseName in "
 				+ convertToReleaseInClause(cmvcSCM.getReleases())
-				+ " order by defectName");
+				+ " order by defectName , pathName , versionSID");
 		return command;
 	}
 

@@ -2,7 +2,6 @@ package hudson.plugins.cmvc.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 import hudson.plugins.cmvc.CmvcChangeLogSet;
 import hudson.plugins.cmvc.CmvcChangeLogSet.CmvcChangeLog;
 import hudson.plugins.cmvc.CmvcChangeLogSet.CmvcChangeLog.ModifiedFile;
@@ -10,10 +9,8 @@ import hudson.plugins.cmvc.CmvcChangeLogSet.CmvcChangeLog.ModifiedFile;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
-import java.text.ParseException;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
