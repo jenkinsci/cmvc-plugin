@@ -11,7 +11,7 @@
 	<artifactId>cmvc</artifactId>
 	<packaging>hpi</packaging>
 	<name>Hudson CMVC Plug-in</name>
-	<version>0.2-SNAPSHOT</version>
+	<version>0.2</version>
 	
 	<url>http://wiki.hudson-ci.org/display/HUDSON/CMVC+Plugin</url>
 
@@ -173,4 +173,10 @@
 			</snapshots>
 		</pluginRepository>
 	</pluginRepositories>
+
+  <scm>
+    <connection>scm:svn:https://guest@svn.dev.java.net/svn/hudson/tags/cmvc-0.2</connection>
+    <developerConnection>scm:svn:https://svn.dev.java.net/svn/hudson/tags/cmvc-0.2</developerConnection>
+    <url>https://hudson.dev.java.net/source/browse/hudson/hudson/plugins/cmvc/tags/cmvc-0.2</url>
+  </scm>
 </project>
