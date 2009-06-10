@@ -11,7 +11,7 @@
 	<artifactId>cmvc</artifactId>
 	<packaging>hpi</packaging>
 	<name>Hudson CMVC Plug-in</name>
-	<version>0.3-SNAPSHOT</version>
+	<version>0.2-SNAPSHOT</version>
 	
 	<url>http://wiki.hudson-ci.org/display/HUDSON/CMVC+Plugin</url>
 
