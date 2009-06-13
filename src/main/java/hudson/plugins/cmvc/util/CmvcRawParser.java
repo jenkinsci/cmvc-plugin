@@ -61,6 +61,7 @@ public class CmvcRawParser {
 				changeLog = new CmvcChangeLog(changeLogSet);
 				changeLog.setDateTime(DateUtil
 						.convertFromCmvcDate(parsedResult[i][10]));
+				changeLog.setReleaseName(parsedResult[i][0]);
 				changeLog.setTrackName(parsedResult[i][1]);
 				changeLog.setMsg(parsedResult[i][12]);
 				changeLog.setType("f".equals(parsedResult[i][11]) ? "feature"

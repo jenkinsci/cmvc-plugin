@@ -203,19 +203,46 @@ public class CmvcSCM extends SCM implements Serializable {
 			CmvcChangeLogSet cmvcChangeLogSet) throws IOException,
 			InterruptedException {
 
-		listener.getLogger().print("Wiping out workspace.");
+		listener.getLogger().println("Wiping out workspace.");
 		workspace.deleteContents();
 		
-		ArgumentListBuilder cmd = new ArgumentListBuilder();
+		ArgumentListBuilder cmd = null;
+		String[] releases = getReleases().split(",");
+		for (String release : releases) {
+			release = release.trim();
+			String[] tracksToCheckout = cmvcChangeLogSet.
+				getTracksPerRelease(release).toArray(new String[0]);
+			
+			String tracksParameter = getCmvcCommandLineUtil().
+				convertToUnixQuotedParameter(tracksToCheckout);
+			
+			if ( "".equals(tracksParameter) ) {
+				listener.getLogger().println("No tracks found to release "
+						+ release);
+			} else {
+				cmd = createCheckoutCommand(launcher, release, tracksParameter);
+				
+				listener.getLogger().println("Invoking checkout script. Release: "
+						+ release);
+				if ( !run(launcher, cmd, listener, workspace, build) ) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	private ArgumentListBuilder createCheckoutCommand(Launcher launcher,
+			String release, String tracksParameter) {
+		ArgumentListBuilder cmd;
+		cmd = new ArgumentListBuilder();
 		if (isGroovyCheckoutScript() && !launcher.isUnix()) {
 			cmd.add("groovy");
 		}
 		cmd.add(this.checkoutScript);
-		cmd.addQuoted(getCmvcCommandLineUtil().convertToUnixQuotedParameter(
-				cmvcChangeLogSet.getTrackNames().toArray(new String[0])));
-
-		listener.getLogger().print("Invoking checkout script.");
-		return run(launcher, cmd, listener, workspace, build);
+		cmd.addQuoted(tracksParameter);
+		cmd.add(release);
+		return cmd;
 	}
 
 	private boolean isGroovyCheckoutScript() {

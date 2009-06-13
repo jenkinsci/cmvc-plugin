@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -61,6 +62,31 @@ public final class CmvcChangeLogSet extends ChangeLogSet<CmvcChangeLogSet.CmvcCh
 		this.logs = logs;
 	}
     
+	public Set<String> getTrackNames() {
+		return trackNames;
+	}
+
+	public void setTrackNames(Set<String> trackNames) {
+		this.trackNames = trackNames;
+	}
+	
+	/**
+	 * @param releaseName 
+	 * @return A set of tracks associated with releaseName.
+	 */
+	public Set<String> getTracksPerRelease(String releaseName) {
+		Set<String> tracks = new HashSet<String>();
+		
+		List<CmvcChangeLog> lstCmvcChangeLog = getLogs();
+		for ( CmvcChangeLog changeLog : lstCmvcChangeLog ) {
+			if ( releaseName.equals(changeLog.getReleaseName()) ) {
+				tracks.add(changeLog.getTrackName());
+			}
+		}
+		
+		return tracks;
+	}
+
     /**
      * In-memory representation of CMVC Changelog: defect or feature.
      */
@@ -99,10 +125,27 @@ public final class CmvcChangeLogSet extends ChangeLogSet<CmvcChangeLogSet.CmvcCh
          */
         private String level;
         
+        /**
+         * Track name
+         */
         private String trackName;
         
+        /**
+         * Release name
+         */
+        private String releaseName;
         
-        @Exported
+        
+		@Exported
+        public String getReleaseName() {
+			return releaseName;
+		}
+
+		public void setReleaseName(String releaseName) {
+			this.releaseName = releaseName;
+		}
+
+		@Exported
         public String getTrackName() {
 			return trackName;
 		}
@@ -276,13 +319,5 @@ public final class CmvcChangeLogSet extends ChangeLogSet<CmvcChangeLogSet.CmvcCh
 
 
     }
-
-	public Set<String> getTrackNames() {
-		return trackNames;
-	}
-
-	public void setTrackNames(Set<String> trackNames) {
-		this.trackNames = trackNames;
-	}
 
 }
