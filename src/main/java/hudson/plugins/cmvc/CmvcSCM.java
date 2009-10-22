@@ -371,7 +371,7 @@ public class CmvcSCM extends SCM implements Serializable {
 			TaskListener listener, FilePath dir, OutputStream out, AbstractBuild build)
 			throws IOException, InterruptedException {
 		Map<String, String> env = createEnvVarMap(true, build);
-		int r = launcher.launch(cmd.toCommandArray(), env, out, dir).join();
+		int r = launcher.launch().cmds(cmd).envs(env).stdout(out).pwd(dir).join();
 		if (r != 0)
 			listener.fatalError(getDescriptor().getDisplayName()
 					+ " failed. exit code=" + r);
@@ -401,7 +401,7 @@ public class CmvcSCM extends SCM implements Serializable {
 
 		try {
 			if (build != null){
-				env = build.getEnvironment();
+				env = build.getEnvironment(TaskListener.NULL);
 			}
 		} catch (IOException e) {
 		} catch (InterruptedException e) {
@@ -490,7 +490,7 @@ public class CmvcSCM extends SCM implements Serializable {
 		}
 
 		@Override
-		public boolean configure(StaplerRequest req) throws FormException {
+		public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
 			this.cmvcPath = Util.fixEmpty(req.getParameter("cmvc.cmvcPath")
 					.trim());
 //			this.cmvcVersion = Util.fixEmpty(req.getParameter(
