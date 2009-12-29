@@ -12,8 +12,14 @@
 	<packaging>hpi</packaging>
 	<name>Hudson CMVC Plug-in</name>
 	<version>0.3-SNAPSHOT</version>
-	
 	<url>http://wiki.hudson-ci.org/display/HUDSON/CMVC+Plugin</url>
+	<developers>
+	  <developer>
+	    <id>gawab</id>
+	    <name>Fábio Franco Uechi</name>
+	    <email>fuechi@ciandt.com</email>
+	  </developer>
+	</developers>
 
 	<dependencies>
 		<dependency>
