@@ -6,6 +6,7 @@ import hudson.plugins.cmvc.CmvcSCM;
 import hudson.plugins.cmvc.CmvcChangeLogSet.CmvcChangeLog;
 import hudson.util.ArgumentListBuilder;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,7 +106,7 @@ public class CommandLineUtil {
 
 	private ArgumentListBuilder buildBasicRawReportCommand(String viewName) {
 		ArgumentListBuilder command = new ArgumentListBuilder();
-		command.add("Report");
+		command.add( getFullyQualifiedCommand( "Report" ));
 		command.add("-family");
 		command.add(cmvcSCM.getFamily());
 
@@ -118,6 +119,18 @@ public class CommandLineUtil {
 		command.add("-view");
 		command.add(viewName);
 		return command;
+	}
+
+	/**
+	 * Given a desired CMVC command, such as "Report", return the fully-qualified
+	 * path to this command based on the CMVC path descriptor in the configuration.
+	 * 
+	 * @param command
+	 * @return
+	 */
+	private String getFullyQualifiedCommand( String command ) {
+		String path = ((CmvcSCM.DescriptorImpl)cmvcSCM.getDescriptor()).getCmvcPath();
+		return path + File.separator + command;
 	}
 
 	/**
