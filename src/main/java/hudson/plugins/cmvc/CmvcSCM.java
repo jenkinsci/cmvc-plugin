@@ -418,6 +418,7 @@ public class CmvcSCM extends SCM implements Serializable {
 	public void buildEnvVars(AbstractBuild build, Map<String, String> env) {
 		super.buildEnvVars(build, env);
 		
+		env.put("CMVC_CLIENT_CMC", DESCRIPTOR.cmvcPath);
 		env.put("CMVC_FAMILY", this.family);
 		env.put("CMVC_RELEASES", this.releases);
 		if (StringUtils.isNotEmpty(this.become)){
