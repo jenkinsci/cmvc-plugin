@@ -9,7 +9,7 @@
 	<artifactId>cmvc</artifactId>
 	<packaging>hpi</packaging>
 	<name>Jenkins CMVC Plug-in</name>
-	<version>0.4</version>
+	<version>0.5-SNAPSHOT</version>
 	<url>http://wiki.jenkins-ci.org/display/JENKINS/CMVC+Plugin</url>
 	<developers>
 	  <developer>
