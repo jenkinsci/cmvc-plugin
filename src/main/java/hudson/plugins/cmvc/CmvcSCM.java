@@ -16,8 +16,10 @@ import hudson.plugins.cmvc.util.CmvcRawParser;
 import hudson.plugins.cmvc.util.CommandLineUtil;
 import hudson.plugins.cmvc.util.DateUtil;
 import hudson.scm.ChangeLogParser;
+import hudson.scm.PollingResult;
 import hudson.scm.SCM;
 import hudson.scm.SCMDescriptor;
+import hudson.scm.SCMRevisionState;
 import hudson.util.ArgumentListBuilder;
 import hudson.util.ForkOutputStream;
 import hudson.util.FormValidation;
@@ -301,28 +303,34 @@ public class CmvcSCM extends SCM implements Serializable {
 		return DESCRIPTOR;
 	}
 
-	/**
+    @Override
+    public SCMRevisionState calcRevisionsFromBuild(AbstractBuild<?, ?> build, Launcher launcher, TaskListener listener) throws IOException, InterruptedException {
+        return SCMRevisionState.NONE;
+    }
+
+    /**
 	 * Polls cmvc repository for integrated tracks within the current family and
 	 * releases
-	 * 
+	 *
 	 * <p>
 	 * By default it checks for changes in a CMVC family (repository). Triggers a build if any
 	 * integrated track within the monitored releases is detected.
 	 * </p>
-	 * 
-	 * 
+	 *
+	 *
 	 * @see hudson.scm.SCM#pollChanges(hudson.model.AbstractProject,
 	 *      hudson.Launcher, hudson.FilePath, hudson.model.TaskListener)
 	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public boolean pollChanges(AbstractProject project, Launcher launcher,
-			FilePath workspace, TaskListener listener) throws IOException,
-			InterruptedException {
+    @Override
+    protected PollingResult compareRemoteRevisionWith(AbstractProject<?, ?> project, Launcher launcher, FilePath workspace, TaskListener listener, SCMRevisionState baseline) throws IOException, InterruptedException {
+        // TODO: this implementation is a straight-forward migration of pre 1.345 polling implementation,
+        // and as it stands now it doesn't use PollingResult correctly. To improve this code,
+        // use PollingResult to capture the state of the repository, then this method should
+        // compare the remote repository state against the state captured in the 'baseline' variable.
 
 		if (project.getLastBuild() == null ) {
 			listener.getLogger().println("No existing build. Starting a new one");
-			return true;
+			return PollingResult.BUILD_NOW;
 		}
 		
 		ArgumentListBuilder cmd = generateChangesDetectionCommand(project,
@@ -331,11 +339,12 @@ public class CmvcSCM extends SCM implements Serializable {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		if (!run(launcher, cmd, listener, workspace, new ForkOutputStream(baos,
 				listener.getLogger()), null))
-			return false;
+			return PollingResult.NO_CHANGES;
+
 		BufferedReader in = new BufferedReader(new InputStreamReader(
 				new ByteArrayInputStream(baos.toByteArray())));
 
-		return CmvcRawParser.parseTrackViewReport(in);
+		return CmvcRawParser.parseTrackViewReport(in) ? PollingResult.SIGNIFICANT : PollingResult.NO_CHANGES;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -415,7 +424,7 @@ public class CmvcSCM extends SCM implements Serializable {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void buildEnvVars(AbstractBuild build, Map<String, String> env) {
+	public void buildEnvVars(AbstractBuild<?,?> build, Map<String, String> env) {
 		super.buildEnvVars(build, env);
 		
 		env.put("CMVC_CLIENT_CMC", DESCRIPTOR.cmvcPath);
