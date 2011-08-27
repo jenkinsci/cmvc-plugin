@@ -14,7 +14,7 @@ import java.util.Date;
 public class DateUtil {
     
     /** Date format expected by CMVC */
-    private static final String CMVC_DATE_FORMAT_INOUT = "yy/MM/dd HH:mm:ss";
+    private static final String CMVC_DATE_FORMAT_INOUT = "yyyy/MM/dd HH:mm:ss";
     
     private static final SimpleDateFormat SDF = new SimpleDateFormat(CMVC_DATE_FORMAT_INOUT);
     /** A working calendar. */
@@ -59,8 +59,7 @@ public class DateUtil {
     public static String convertToCmvcDate(Date lastBuild) {
     	if (lastBuild != null) {
     		CALENDAR.setTime(lastBuild);
-    		String sufix = CALENDAR.get(Calendar.YEAR) < 2000 ? "0" : "1";
-    		return "'" + sufix + SDF.format(lastBuild) + "'";
+    		return "'" + SDF.format( lastBuild ) + "'";
     	}
     	return null;
     }
