@@ -6,7 +6,6 @@ import hudson.plugins.cmvc.CmvcChangeLogSet.CmvcChangeLog;
 import hudson.plugins.cmvc.CmvcChangeLogSet.CmvcChangeLog.ModifiedFile;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.Entry;
-import hudson.util.Digester2;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -20,7 +19,7 @@ import java.util.Map;
 
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.locale.converters.DateLocaleConverter;
-import org.apache.commons.digester.Digester;
+import org.apache.commons.digester3.Digester;
 import org.apache.commons.lang.StringUtils;
 import org.xml.sax.SAXException;
 
@@ -202,7 +201,7 @@ public class CmvcRawParser {
 	 * @throws SAXException
 	 */
 	public static List<CmvcChangeLog> parseChangeLogFile(Reader reader) throws IOException, SAXException {
-		Digester digester = new Digester2();
+		Digester digester = new Digester();
 		ArrayList<CmvcChangeLog> r = new ArrayList<CmvcChangeLog>();
 		
 		String pattern = "yyyy-MM-dd HH:mm:ss.0 z";
