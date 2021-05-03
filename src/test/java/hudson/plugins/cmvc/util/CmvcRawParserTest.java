@@ -11,6 +11,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -18,7 +19,7 @@ import org.junit.Test;
 
 public class CmvcRawParserTest {
 
-	final String testTrackViewResultNoLogin = "1.0|236|d|complete||107/11/08 12:41:"
+	final static String testTrackViewResultNoLogin = "1.0|236|d|complete||107/11/08 12:41:"
 			+ "37||Leandro Goncalves||LVL0711091728|107/11/10 00"
 			+ ":34:27|d|[UC15] Alteracao de pergunta combo dependente de s"
 			+ "im/nao\n1.0|290|u21|complete||107/11/08 15:01:48||"
@@ -135,7 +136,7 @@ public class CmvcRawParserTest {
 		List<CmvcChangeLog> result = null;
 		
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
-				ClassLoader.getSystemResourceAsStream("changelog.xml")));
+				ClassLoader.getSystemResourceAsStream("changelog.xml"), StandardCharsets.UTF_8));
 		
 		result = CmvcRawParser.parseChangeLogFile(reader);
 		assertNotNull(result);

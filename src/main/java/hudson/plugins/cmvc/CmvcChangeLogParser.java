@@ -7,8 +7,11 @@ import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.Entry;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 
 import org.xml.sax.SAXException;
 
@@ -28,9 +31,10 @@ public class CmvcChangeLogParser extends ChangeLogParser {
 	@Override
 	public ChangeLogSet<? extends Entry> parse(AbstractBuild build,
 			File changelogFile) throws IOException, SAXException {
-		FileReader fileReader = new FileReader(changelogFile);
+		Reader reader = new InputStreamReader(new FileInputStream(changelogFile), StandardCharsets.UTF_8);
+		
 		return new CmvcChangeLogSet(build, CmvcRawParser
-				.parseChangeLogFile(fileReader));
+				.parseChangeLogFile(reader));
 	}
 
 }
