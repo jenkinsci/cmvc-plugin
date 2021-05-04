@@ -12,9 +12,9 @@
 	<version>0.5-SNAPSHOT</version>
 	<url>http://wiki.jenkins-ci.org/display/JENKINS/CMVC+Plugin</url>
   
-  <properties>
-    <java.level>8</java.level>
-  </properties>
+	<properties>
+		<java.level>8</java.level>
+    </properties>
 
 	<developers>
 	  <developer>
@@ -30,11 +30,11 @@
 			<artifactId>utils</artifactId>
 			<version>1.07.00</version>
 		</dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-digester3</artifactId>
-            <version>3.2</version>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-digester3</artifactId>
+			<version>3.2</version>
+		</dependency>
 	</dependencies>
 
     <scm>
