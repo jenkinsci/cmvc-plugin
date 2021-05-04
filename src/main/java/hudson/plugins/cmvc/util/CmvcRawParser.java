@@ -6,7 +6,6 @@ import hudson.plugins.cmvc.CmvcChangeLogSet.CmvcChangeLog;
 import hudson.plugins.cmvc.CmvcChangeLogSet.CmvcChangeLog.ModifiedFile;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.Entry;
-import hudson.util.Digester2;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -20,12 +19,14 @@ import java.util.Map;
 
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.locale.converters.DateLocaleConverter;
-import org.apache.commons.digester.Digester;
+import org.apache.commons.digester3.Digester;
 import org.apache.commons.lang.StringUtils;
 import org.xml.sax.SAXException;
 
 import com.Ostermiller.util.CSVParser;
 import com.thoughtworks.xstream.XStream;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * 
@@ -202,7 +203,7 @@ public class CmvcRawParser {
 	 * @throws SAXException
 	 */
 	public static List<CmvcChangeLog> parseChangeLogFile(Reader reader) throws IOException, SAXException {
-		Digester digester = new Digester2();
+		Digester digester = createDigester(!Boolean.getBoolean(CmvcRawParser.class.getName() + ".UNSAFE"));
 		ArrayList<CmvcChangeLog> r = new ArrayList<CmvcChangeLog>();
 		
 		String pattern = "yyyy-MM-dd HH:mm:ss.0 z";
@@ -231,6 +232,22 @@ public class CmvcRawParser {
 		digester.parse(reader);
 
 		return r;
+	}
+
+	private static Digester createDigester(boolean secure) throws SAXException {
+		Digester digester = new Digester();
+		if (secure) {
+			digester.setXIncludeAware(false);
+			try {
+				digester.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+				digester.setFeature("http://xml.org/sax/features/external-general-entities", false);
+				digester.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+				digester.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+			} catch (ParserConfigurationException ex) {
+				throw new SAXException("Failed to securely configure xml digester parser", ex);
+			}
+		}
+		return digester;
 	}
 
 }

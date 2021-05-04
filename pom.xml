@@ -3,7 +3,7 @@
     <parent>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>plugin</artifactId>
-      <version>1.396</version>
+      <version>3.57</version>
     </parent>
 
 	<artifactId>cmvc</artifactId>
@@ -11,10 +11,15 @@
 	<name>Jenkins CMVC Plug-in</name>
 	<version>0.5-SNAPSHOT</version>
 	<url>http://wiki.jenkins-ci.org/display/JENKINS/CMVC+Plugin</url>
+  
+	<properties>
+		<java.level>8</java.level>
+	</properties>
+
 	<developers>
 	  <developer>
 	    <id>gawab</id>
-	    <name>F‡bio Franco Uechi</name>
+	    <name>FÃ¡bio Franco Uechi</name>
 	    <email>fuechi@ciandt.com</email>
 	  </developer>
 	</developers>
@@ -24,6 +29,11 @@
 			<groupId>org.ostermiller</groupId>
 			<artifactId>utils</artifactId>
 			<version>1.07.00</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-digester3</artifactId>
+			<version>3.2</version>
 		</dependency>
 	</dependencies>
 

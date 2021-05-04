@@ -185,11 +185,11 @@ public final class CmvcChangeLogSet extends ChangeLogSet<CmvcChangeLogSet.CmvcCh
 
         @Exported
         public Date getDateTime() {
-            return dateTime;
+            return dateTime == null ? null : new Date(dateTime.getTime());
         }
 
         public void setDateTime(Date date) {
-            this.dateTime = date;
+            this.dateTime = date == null ? null : new Date(date.getTime());
         }
 
         @Override @Exported

@@ -1,5 +1,7 @@
 package hudson.plugins.cmvc.util;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -11,6 +13,7 @@ import java.util.Date;
  * @author <a href="mailto:fuechi@ciandt.com">Fábio Franco Uechi</a>
  *
  */
+@SuppressFBWarnings({"STCAL_INVOKE_ON_STATIC_DATE_FORMAT_INSTANCE", "STCAL_INVOKE_ON_STATIC_CALENDAR_INSTANCE"})
 public class DateUtil {
     
     /** Date format expected by CMVC */

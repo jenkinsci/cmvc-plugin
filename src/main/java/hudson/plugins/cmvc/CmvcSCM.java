@@ -28,11 +28,14 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
@@ -130,7 +133,7 @@ public class CmvcSCM extends SCM implements Serializable {
 	/**
 	 * Utility class
 	 */
-	private CommandLineUtil commandLineUtil = null;
+	private transient CommandLineUtil commandLineUtil = null;
 
 	/**
 	 * @param family
@@ -191,11 +194,11 @@ public class CmvcSCM extends SCM implements Serializable {
 
 	private void writeChangeLogFile(File changelogFile,
 			CmvcChangeLogSet cmvcChangeLogSet) throws IOException {
-		FileWriter fileWriter = new FileWriter(changelogFile);
+		Writer writer = new OutputStreamWriter(new FileOutputStream(changelogFile), StandardCharsets.UTF_8);
 		try {
-			CmvcRawParser.writeChangeLogFile(cmvcChangeLogSet, fileWriter);
+			CmvcRawParser.writeChangeLogFile(cmvcChangeLogSet, writer);
 		} finally {
-			IOUtils.closeQuietly(fileWriter);
+			IOUtils.closeQuietly(writer);
 		}
 	}
 
@@ -264,7 +267,7 @@ public class CmvcSCM extends SCM implements Serializable {
 		if (run(launcher, cmd, listener, workspace, new ForkOutputStream(baos,
 				listener.getLogger()), build)) {
 			BufferedReader in = new BufferedReader(new InputStreamReader(
-					new ByteArrayInputStream(baos.toByteArray())));
+					new ByteArrayInputStream(baos.toByteArray()), StandardCharsets.UTF_8));
 			changeLogSet = new CmvcChangeLogSet(build);
 			List<CmvcChangeLog> logs = CmvcRawParser.parseTrackViewReport(in,
 					changeLogSet);
@@ -281,7 +284,7 @@ public class CmvcSCM extends SCM implements Serializable {
 			if (run(launcher, cmd, listener, workspace, new ForkOutputStream(
 					baos, listener.getLogger()), build)) {
 				BufferedReader in = new BufferedReader(new InputStreamReader(
-						new ByteArrayInputStream(baos.toByteArray())));
+						new ByteArrayInputStream(baos.toByteArray()), StandardCharsets.UTF_8));
 
 				CmvcRawParser.parseChangeViewReportAndPopulateChangeLogs(in,
 						changeLogSet);
@@ -342,7 +345,7 @@ public class CmvcSCM extends SCM implements Serializable {
 			return PollingResult.NO_CHANGES;
 
 		BufferedReader in = new BufferedReader(new InputStreamReader(
-				new ByteArrayInputStream(baos.toByteArray())));
+				new ByteArrayInputStream(baos.toByteArray()), StandardCharsets.UTF_8));
 
 		return CmvcRawParser.parseTrackViewReport(in) ? PollingResult.SIGNIFICANT : PollingResult.NO_CHANGES;
 	}
